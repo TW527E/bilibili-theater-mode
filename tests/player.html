@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>劇場控制列測試</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #111; color: #fff; font: 16px/1.6 sans-serif; }
+  main { padding: 0; }
+  h1 { font-size: 24px; margin: 24px 24px 8px; }
+  main > p { margin: 0 24px 24px; }
+  h2 { font-size: 18px; margin: 0 0 8px; }
+  #fixture { background: #000; }
+  .video-container-v1 { display: flex; gap: 24px; width: calc(100% - 48px); max-width: 1200px; margin: auto; align-items: flex-start; }
+  .left-container { flex: 1; min-width: 0; }
+  .right-container { width: 350px; flex-shrink: 0; }
+  .up-panel-container, .rcmd-tab, #arc_toolbar_report, #v_desc, #commentapp { padding-block: 12px; }
+  .up-panel-container a, .rcmd-tab a { color: #fff; }
+  .up-panel-container button { margin-left: 12px; font: inherit; }
+  .rcmd-tab a { display: block; }
+  @media (max-width: 900px) {
+    .video-container-v1 { display: block; }
+    .left-container, .right-container { width: 100%; }
+  }
+  .bpx-player-primary-area > video { display: none; }
+  .bpx-player-ctrl-setting-box { padding: 12px; color: white; }
+  .bui-panel-wrap { width: 286px; }
+  .bui-panel-move { display: flex; }
+  .bui-panel-item { min-width: 286px; }
+  .bui-panel-item:not(.bui-panel-item-active) { display: none; }
+  .bpx-player-ctrl-setting-menu-left { padding: 6px 20px; }
+  .bpx-player-ctrl-setting-menu-left > div { height: 32px; }
+  .bpx-player-ctrl-setting-menu-right { box-sizing: border-box; padding: 16px 20px; width: 100%; }
+  .bpx-player-ctrl-setting-others-title { font: 12px/16px sans-serif; margin-bottom: 4px; }
+  .bpx-player-ctrl-setting-others-content { display: flex; flex-wrap: wrap; width: 100%; }
+  .bpx-player-ctrl-setting-others-content .bpx-player-ctrl-setting-checkbox { display: inline-block; height: 20px; line-height: 20px; width: 33.3333%; }
+  .bui-checkbox { cursor: pointer; position: relative; }
+  .bui-checkbox .bui-checkbox-input { cursor: pointer; height: 100%; left: 0; margin: 0; opacity: 0; position: absolute; top: 0; width: 100%; z-index: 1; }
+  .bui-checkbox .bui-checkbox-label { align-items: center; display: flex; justify-content: center; vertical-align: middle; }
+  .bui-checkbox .bui-checkbox-name { color: #fff; font: 12px/12px sans-serif; }
+  .bui-checkbox .bui-checkbox-icon { display: inline-block; height: 16px; line-height: 16px; margin-right: 4px; vertical-align: middle; width: 16px; }
+  .bui-checkbox .bui-checkbox-icon svg { fill: #fff; vertical-align: top; }
+  .bui-checkbox .bui-checkbox-icon-selected { display: none; }
+  .bui-checkbox .bui-checkbox-input:checked + .bui-checkbox-label .bui-checkbox-icon svg { fill: #00a1d6; }
+  .bui-checkbox .bui-checkbox-input:checked + .bui-checkbox-label .bui-checkbox-icon-default { display: none; }
+  .bui-checkbox .bui-checkbox-input:checked + .bui-checkbox-label .bui-checkbox-icon-selected { display: inline-block; }
+  .up-avatar img { width: 40px; height: 40px; vertical-align: middle; margin-left: 8px; }
+  .bpx-player-primary-area { display: flex; flex-direction: column; }
+  .bpx-player-video-area { padding: 24px 12px; }
+  .bpx-player-control-bottom-right { display: flex; justify-content: flex-end; align-items: center; height: 35px; }
+  [data-ctrl-hidden="true"] .bpx-player-control-bottom { opacity: 0; }
+  .bpx-player-ctrl-btn { display: block; position: relative; background: none; color: #fff; width: 36px; height: 22px; padding: 0; border: 0; cursor: pointer; }
+  .bpx-player-ctrl-btn svg { display: block; margin: auto; width: 24px; height: 24px; }
+  .bpx-player-sending-area { height: 46px; flex-shrink: 0; font-size: 14px; }
+  .bpx-player-sending-bar { display: flex; align-items: center; gap: 12px; height: 46px; padding: 0 12px; background: #181818; }
+  .bpx-player-sending-bar > span:last-child { flex: 1; min-width: 0; padding: 4px 8px; background: #282828; }
+  #results { padding: 0 24px 0 48px; }
+  input, select, [contenteditable] { background: #222; color: #fff; font: inherit; border: 1px solid #777; max-width: 100%; }
+  .editors { display: grid; gap: 8px; margin: 24px; }
+</style>
+<main>
+  <h1>劇場控制列</h1>
+  <p>劇場按鈕位於寬屏左側；點擊或按 T 切換。</p>
+  <div id="fixture" data-ui></div>
+  <div class="editors">
+    <input aria-label="輸入框快捷鍵測試">
+    <div contenteditable="true" role="textbox" aria-label="文字編輯快捷鍵測試">編輯時不切換劇場模式</div>
+    <select aria-label="選單快捷鍵測試"><option>選擇時不切換</option></select>
+  </div>
+  <p id="summary" role="status">準備測試</p>
+  <ol id="results"></ol>
+</main>
+<script>
+  window.testPrefs = new Map([['showBtn', false], ['darkMode', new URLSearchParams(location.search).get('lights') !== 'off'], ['theaterOn', new URLSearchParams(location.search).get('saved') === 'true']]);
+  window.testMenus = new Map();
+  window.GM_getValue = (key, fallback) => testPrefs.has(key) ? testPrefs.get(key) : fallback;
+  window.GM_setValue = (key, value) => testPrefs.set(key, value);
+  window.GM_addStyle = css => { const style = document.createElement('style'); style.textContent = css; document.head.append(style); };
+  window.GM_registerMenuCommand = (name, callback, options) => testMenus.set(options.id, {name, callback});
+</script>
+<link id="__css-map__" href="/original-light.css">
+<script src="../bili-theater.user.js"></script>
+<script src="player.test.js"></script>
+</html>
