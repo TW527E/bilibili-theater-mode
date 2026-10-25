@@ -4,7 +4,7 @@
 
 A userscript that adds a YouTube-style theater mode to regular videos on Bilibili's desktop website. The player spans the page, with the title, video information, and uploader details below it. Recommendations and comments remain available.
 
-Forked from [astrytk/bilibili-theater-mode](https://github.com/astrytk/bilibili-theater-mode), with subsequent changes maintained by TW527E. Current version: **0.3.5**.
+Forked from [astrytk/bilibili-theater-mode](https://github.com/astrytk/bilibili-theater-mode), with subsequent changes maintained by TW527E. Current version: **0.3.6**.
 
 ## Installation and updates
 
@@ -62,7 +62,7 @@ python -m http.server 8765 --bind 127.0.0.1
 
 Open the [test page](http://127.0.0.1:8765/tests/player.html). Tests run automatically and display their results. Add `?saved=true` to test a saved theater preference, or `?lights=off` to test a disabled legacy lights preference.
 
-The suite currently contains **69 browser assertions** covering mode changes and restoration, native wide-screen interaction, stored preferences, centered danmaku controls, details layout, delayed initialization, player replacement, keyboard shortcuts, and automatic lights off. It uses a fixed player fixture and does not replace compatibility checks on the real Bilibili website.
+The suite currently contains **71 browser assertions** covering mode changes and restoration, native wide-screen interaction, stored preferences, centered danmaku controls, details layout, delayed initialization, player replacement, keyboard shortcuts, and automatic lights off. It uses a fixed player fixture and does not replace compatibility checks on the real Bilibili website.
 
 ## License and credits
 
