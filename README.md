@@ -4,7 +4,7 @@
 
 為 Bilibili 桌面版一般投稿影片加入類似 YouTube 的劇場模式。播放器橫向鋪滿，標題、影片資訊與 UP 主資料排列在播放器下方，推薦影片與評論保留。
 
-此版本由 [astrytk/bilibili-theater-mode](https://github.com/astrytk/bilibili-theater-mode) fork，後續修改由 TW527E 維護。目前版本：**0.3.5**。
+此版本由 [astrytk/bilibili-theater-mode](https://github.com/astrytk/bilibili-theater-mode) fork，後續修改由 TW527E 維護。目前版本：**0.3.6**。
 
 ## 安裝與更新
 
@@ -62,7 +62,7 @@ python -m http.server 8765 --bind 127.0.0.1
 
 開啟 [測試頁](http://127.0.0.1:8765/tests/player.html)；測試會自動執行並顯示結果。可加上 `?saved=true` 檢查已儲存的劇場偏好，或 `?lights=off` 檢查舊版關燈偏好為關閉的情況。
 
-目前包含 **69 項瀏覽器斷言**，涵蓋模式切換與還原、寬屏互動、偏好儲存、彈幕列置中、資訊排列、延遲初始化、換片、快捷鍵及自動關燈。測試使用固定的播放器模擬頁；它不能取代實際 Bilibili 環境的相容性檢查。
+目前包含 **71 項瀏覽器斷言**，涵蓋模式切換與還原、寬屏互動、偏好儲存、彈幕列置中、資訊排列、延遲初始化、換片、快捷鍵及自動關燈。測試使用固定的播放器模擬頁；它不能取代實際 Bilibili 環境的相容性檢查。
 
 ## 授權與致謝
 

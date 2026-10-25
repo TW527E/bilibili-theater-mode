@@ -52,6 +52,7 @@
       <div id="arc_toolbar_report">互動按鈕</div><div id="v_desc">測試影片簡介</div><div id="commentapp"><h2>評論</h2></div>
       </div><div class="right-container"><div class="right-container-inner">
         <div class="up-panel-container"><a class="up-avatar" href="#test-channel">測試 UP 主</a><div class="default-btn">載入中</div></div>
+        <div class="video-pod-above-modules"><div class="video-pod-above-modules__inner"><div class="danmaku-box">彈幕列表</div></div></div>
         <div class="rcmd-tab"><h2>接下來播放</h2><a href="#test-recommendation">推薦影片連結</a></div>
       </div></div></div>`;
     const video = player().querySelector('video');
@@ -132,6 +133,8 @@
     check(active() && !style().disabled && player().dataset.screen === 'wide', '按鈕開啟劇場與寬屏');
     checkDetails('劇場模式');
     check(document.querySelector('.right-container').getBoundingClientRect().top >= document.querySelector('#playerWrap').getBoundingClientRect().bottom, '劇場推薦欄從播放器下方開始');
+    const danmakuRect = document.querySelector('.danmaku-box').getBoundingClientRect();
+    check(Math.abs(danmakuRect.top - document.querySelector('.right-container').getBoundingClientRect().top) < 1 && document.querySelector('.rcmd-tab').getBoundingClientRect().top - danmakuRect.bottom <= 40, '劇場右欄清除原生寬屏預留空白，保留彈幕列表並緊接推薦影片');
     check(testPrefs.get('theaterOn') === true, '手動開啟後保存劇場偏好');
     const areaRect = player().querySelector('.bpx-player-sending-area').getBoundingClientRect();
     const barRect = player().querySelector('.bpx-player-sending-bar').getBoundingClientRect();
@@ -165,6 +168,7 @@
     player().dataset.screen = 'wide'; await settle();
     key(); key(); await settle();
     check(!active() && player().dataset.screen === 'wide', '原先已寬屏時退出仍保留寬屏');
+    check(getComputedStyle(document.querySelector('.danmaku-box')).marginTop === '769px', '退出劇場後保留原生寬屏的彈幕列表間距');
     for (const options of [{repeat:true}, {isComposing:true}, {ctrlKey:true}, {altKey:true}, {metaKey:true}, {shiftKey:true}]) key(document.body, options);
     for (const editor of document.querySelectorAll('input, select, [contenteditable]')) key(editor);
     const host = document.createElement('div'); document.body.append(host);

@@ -2,7 +2,7 @@
 // @name         B站剧场模式
 // @name:zh-CN   B站剧场模式
 // @namespace    https://github.com/astrytk/bilibili-theater-mode
-// @version      0.3.5
+// @version      0.3.6
 // @description  为B站普通投稿视频添加类YouTube剧场模式。点击播放器控制栏的剧场按钮或按 T 键切换。
 // @description:zh-CN  为B站普通投稿视频添加类YouTube剧场模式。点击播放器控制栏的剧场按钮或按 T 键切换。
 // @author       astrytk, TW527E
@@ -158,6 +158,7 @@
         flex: 0 0 350px !important;
         margin: ${height + 20}px 0 0 !important;
       }
+      .right-container .danmaku-box { margin-top: 0 !important; }
       #playerWrap, .player-wrap {
         width: ${width}px !important;
         height: ${height}px !important;
