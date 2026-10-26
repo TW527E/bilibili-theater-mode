@@ -2,7 +2,7 @@
 // @name         B站剧场模式
 // @name:zh-CN   B站剧场模式
 // @namespace    https://github.com/astrytk/bilibili-theater-mode
-// @version      0.3.6
+// @version      0.3.10
 // @description  为B站普通投稿视频添加类YouTube剧场模式。点击播放器控制栏的剧场按钮或按 T 键切换。
 // @description:zh-CN  为B站普通投稿视频添加类YouTube剧场模式。点击播放器控制栏的剧场按钮或按 T 键切换。
 // @author       astrytk, TW527E
@@ -130,11 +130,118 @@
   theaterStyle.disabled = true;
   document.head.append(theaterStyle);
 
+  const BEWLY_HEADER = '#bewly-wrapper header:has(> main[h="$bew-top-bar-height"])';
+  const bewlyStyle = document.createElement('style');
+  bewlyStyle.id = 'bili-theater-bewly-style';
+  const bewlyPageStyle = document.createElement('style');
+  bewlyPageStyle.id = 'bili-theater-bewly-page-style';
+  document.head.append(bewlyPageStyle);
+  let bewlyRoot = null;
+  let bewlyGradient = GM_getValue('bewlyThemeGradient', null);
+  const darkHeaders = new Set();
+  const bewlyObserver = new MutationObserver(syncBewly);
+  const reloadBewlyTheme = ({ target }) => {
+    if (!target.matches?.('link[rel="stylesheet"]')) return;
+    bewlyStyle.textContent = '';
+    syncBewly();
+  };
+
+  function syncBewlyGradient() {
+    if (!bewlyRoot) return;
+    // shortcut: 只读取本页设置面板，扩展公开接口后再同步其他分页的变更。
+    const row = [...bewlyRoot.querySelectorAll('.b-settings-item')].find(item =>
+      /^(在顶栏显示主题色渐变|在頂欄顯示主題色漸變|Show theme color gradient in top bar|喺頂部欄顯示主題色漸變)/.test(item.querySelector('.left-content > div')?.textContent.trim()));
+    const control = row?.querySelector('.right-content input[type="checkbox"]');
+    if (control && control.checked !== bewlyGradient) {
+      bewlyGradient = control.checked;
+      GM_setValue('bewlyThemeGradient', bewlyGradient);
+    }
+    bewlyRoot.host.toggleAttribute('data-bili-theater-gradient', bewlyGradient === true);
+  }
+
+  function syncBewly() {
+    const root = document.getElementById('bewly')?.shadowRoot;
+    if (root !== bewlyRoot) {
+      bewlyObserver.disconnect();
+      bewlyRoot?.removeEventListener('load', reloadBewlyTheme, true);
+      bewlyRoot?.removeEventListener('change', syncBewlyGradient);
+      bewlyRoot = root;
+      bewlyStyle.textContent = '';
+      if (root) {
+        root.append(bewlyStyle);
+        bewlyObserver.observe(root, { childList: true, subtree: true });
+        root.addEventListener('load', reloadBewlyTheme, true);
+        root.addEventListener('change', syncBewlyGradient);
+      }
+    }
+    syncBewlyGradient();
+    if (root && !bewlyStyle.textContent) {
+      let css = '';
+      // 复用已安装版本的深色变量及外观选项，保留原生阴影、磨砂和用户主题色。
+      for (const sheet of root.styleSheets) {
+        let rules;
+        try { rules = sheet.cssRules; } catch { continue; }
+        for (const rule of rules) {
+          const host = rule.selectorText?.match(/:host\(#bewly((?:\.[\w-]+)+)\)/);
+          if (!host) continue;
+          const options = host[1].replace(/\.dark\b/g, '');
+          css += `:is(:host(#bewly${options}), :root${options}) :is(.bili-header, ${BEWLY_HEADER}) {${rule.style.cssText}}\n`;
+        }
+      }
+      if (css) {
+        // 局部深色时补上原本由全站深色背景提供的底色，避免透明顶栏透出白色。
+        css += `:is(.bili-header, ${BEWLY_HEADER}) { color: var(--bew-text-1); background: var(--bew-bg); }`;
+        // 使用原生滚动遮罩判断是否在页首；全站深色时保留 Bewly 自己的渐层。
+        css += `
+          :host(#bewly[data-bili-theater-gradient]:not(.dark)) ${BEWLY_HEADER}:not(.force-white-icon):not(:has(> main > [style*="mask-image"]))::after {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto;
+            height: var(--bew-top-bar-height);
+            z-index: 0;
+            pointer-events: none;
+            background: linear-gradient(to bottom, var(--bew-theme-color-10), transparent);
+          }
+        `;
+        bewlyStyle.textContent = css;
+        bewlyPageStyle.textContent = css;
+      }
+    }
+    const enabled = !!root && !!bewlyStyle.textContent && !theaterStyle.disabled;
+    bewlyStyle.disabled = bewlyPageStyle.disabled = !enabled;
+    const headers = enabled ? [root.querySelector(BEWLY_HEADER), document.querySelector('.bili-header')].filter(Boolean) : [];
+    for (const header of darkHeaders) {
+      if (!headers.includes(header)) { header.classList.remove('dark'); darkHeaders.delete(header); }
+    }
+    for (const header of headers) {
+      bewlyObserver.observe(header, { attributes: true, attributeFilter: ['class'] });
+      if (!header.classList.contains('dark')) { header.classList.add('dark'); darkHeaders.add(header); }
+    }
+  }
+
   function updateLayout() {
     const height = Math.floor(window.innerHeight * VIDEO_RATIO);
     const width = Math.max(document.documentElement.clientWidth, document.getElementById('app')?.clientWidth || 0);
     const contentWidth = Math.min(1200, width - 48);
     theaterStyle.textContent = `
+      .bili-header {
+        --bg1: #18191c;
+        --bg2: #232528;
+        --bg3: #2f3134;
+        --bg1_float: #232528;
+        --bg2_float: #2f3134;
+        --bg3_float: #36383c;
+        --text1: #f1f2f3;
+        --text2: #c9ccd0;
+        --text3: #a2a7ae;
+        --text4: #61666d;
+        --line_regular: #3b3d42;
+        --line_light: #2f3134;
+        --graph_bg_thin: #232528;
+        --graph_bg_regular: #2f3134;
+        --graph_bg_thick: #3b3d42;
+        --graph_icon: #c9ccd0;
+      }
       #bilibili-player-placeholder-bottom-left,
       #bilibili-player-placeholder-bottom-right { display: none !important; }
 
@@ -298,6 +405,7 @@
   function syncScreen() {
     // 全屏和小窗交给原生播放器，返回页面后再恢复剧场布局。
     theaterStyle.disabled = !theaterOn || !isPageScreen();
+    syncBewly();
     button.disabled = !isPageScreen();
   }
 
@@ -319,7 +427,7 @@
       updateLayout();
       window.scrollTo({ top: 0, behavior: 'instant' });
     } else {
-      theaterStyle.disabled = true;
+      syncScreen();
       if (restoreWide && changedWide && player?.getAttribute('data-screen') === 'wide') {
         player.querySelector('.bpx-player-ctrl-wide')?.click();
       }

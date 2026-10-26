@@ -4,7 +4,7 @@
 
 A userscript that adds a YouTube-style theater mode to regular videos on Bilibili's desktop website. The player spans the page, with the title, video information, and uploader details below it. Recommendations and comments remain available.
 
-Forked from [astrytk/bilibili-theater-mode](https://github.com/astrytk/bilibili-theater-mode), with subsequent changes maintained by TW527E. Current version: **0.3.6**.
+Forked from [astrytk/bilibili-theater-mode](https://github.com/astrytk/bilibili-theater-mode), with subsequent changes maintained by TW527E. Current version: **0.3.10**.
 
 ## Installation and updates
 
@@ -19,6 +19,7 @@ This fork retains the original script name and `@namespace` to support updating 
 ## Features
 
 - **Player control button:** The theater button sits immediately to the left of Bilibili's native wide-screen button and appears with the player controls. Blue indicates that theater mode is enabled.
+- **Dark navigation bar:** Theater mode gives the native Bilibili or Bewly top bar and search field a dark theme while preserving the rest of the page’s theme. Exiting restores the original colors. Automatic lights off remains a separate setting.
 - **Remembered theater mode:** The next video loads with your last theater-mode preference.
 - **Centered danmaku controls:** In theater mode, the viewer count, danmaku controls, and message field form a centered group with a maximum width of 1200px. The background extends to both player edges.
 - **Details below the player:** The title, video information, and uploader details appear below the player in both normal and theater modes, including the avatar and follow button.
@@ -41,6 +42,17 @@ The added lights setting is labeled **自動關燈** (“automatic lights off”
 
 Exiting with the theater button or `T` restores the normal/wide-screen state from before entering theater mode. To adjust player height, edit `VIDEO_RATIO` near the top of the script; the default is `11/13` of the viewport height.
 
+## Bewly top bar compatibility
+
+Verified with [BewlyBewly-AveMujica](https://github.com/VentusUta/BewlyBewly-AveMujica). Theater mode reuses the installed version's dark variables, shadows, frosted-glass effects, and theme color for the top bar and its menus. It does not enable the global dark theme. The native Bilibili top bar works independently when Bewly is absent.
+
+The theme gradient follows Bewly's **Show theme color gradient in top bar** switch under **Desktop and Dock**:
+
+- On first use, open that settings panel on the video page once so the script can read the actual preference. No custom gradient appears until the preference is known.
+- Changes made in the same page apply immediately. The userscript manager remembers the last observed value.
+- The gradient is limited to the theater top bar and follows Bewly's page-top and forced-white-icon conditions. When the global dark theme is active, Bewly manages its own gradient.
+- Bewly does not expose a public interface for this preference, so changes in other tabs are not guaranteed to synchronize. Reopen the settings panel on this page to refresh the value. Future changes to setting labels or markup may require an update.
+
 ## Scope and compatibility
 
 - Matches `https://www.bilibili.com/video/*` and `https://www.bilibili.com/zh-Hant/video/*`.
@@ -62,7 +74,9 @@ python -m http.server 8765 --bind 127.0.0.1
 
 Open the [test page](http://127.0.0.1:8765/tests/player.html). Tests run automatically and display their results. Add `?saved=true` to test a saved theater preference, or `?lights=off` to test a disabled legacy lights preference.
 
-The suite currently contains **71 browser assertions** covering mode changes and restoration, native wide-screen interaction, stored preferences, centered danmaku controls, details layout, delayed initialization, player replacement, keyboard shortcuts, and automatic lights off. It uses a fixed player fixture and does not replace compatibility checks on the real Bilibili website.
+Use `?gradient=on` or `?gradient=off` to test a saved Bewly gradient preference.
+
+The suite currently contains **118 browser assertions** covering mode changes and restoration, native wide-screen interaction, stored preferences, centered danmaku controls, details layout, delayed initialization, player replacement, keyboard shortcuts, automatic lights off, native and Bewly header themes, theme gradients, and settings-panel synchronization. It uses a fixed player fixture and does not replace compatibility checks on the real Bilibili website.
 
 ## License and credits
 

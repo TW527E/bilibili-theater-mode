@@ -5,12 +5,20 @@
 <title>劇場控制列測試</title>
 <style>
   * { box-sizing: border-box; }
-  body { margin: 0; background: #111; color: #fff; font: 16px/1.6 sans-serif; }
+  :root { --bg1: #fff; --bg1_float: #fff; --bg3: #f1f2f3; --text1: #18191c; --text2: #61666d; --line_regular: #e3e5e7; }
+  body { margin: 0; background: var(--bg1); color: var(--text1); font: 16px/1.6 sans-serif; }
+  .bili-header { position: sticky; top: 0; z-index: 1000; }
+  .bili-header__bar { display: flex; align-items: center; gap: 24px; height: 64px; padding-inline: 24px; background: var(--bg1_float); color: var(--text1); }
+  .bili-header a { color: inherit; }
+  :root.test-bewly { --bew-content: #fff; }
+  :root.test-bewly .bili-header__bar { background: var(--bew-content); }
+  #nav-searchform { flex: 1; min-width: 0; background: var(--bg3); border: 1px solid var(--line_regular); padding: 4px 12px; }
+  #nav-searchform .nav-search-input { width: 100%; background: transparent; color: var(--text2); border: 0; outline-offset: 2px; }
   main { padding: 0; }
   h1 { font-size: 24px; margin: 24px 24px 8px; }
   main > p { margin: 0 24px 24px; }
   h2 { font-size: 18px; margin: 0 0 8px; }
-  #fixture { background: #000; }
+  #fixture { background: var(--bg1); }
   .video-container-v1 { display: flex; gap: 24px; width: calc(100% - 48px); max-width: 1200px; margin: auto; align-items: flex-start; }
   .left-container { flex: 1; min-width: 0; }
   .right-container { width: 350px; flex-shrink: 0; }
@@ -18,13 +26,14 @@
   .video-pod-above-modules, .video-pod-above-modules__inner { display: flow-root; }
   .danmaku-box { height: 44px; margin-bottom: 20px; }
   .video-container-v1:has(.bpx-player-container[data-screen="wide"]) .danmaku-box { margin-top: 769px; }
-  .up-panel-container a, .rcmd-tab a { color: #fff; }
+  .up-panel-container a, .rcmd-tab a { color: inherit; }
   .up-panel-container button { margin-left: 12px; font: inherit; }
   .rcmd-tab a { display: block; }
   @media (max-width: 900px) {
     .video-container-v1 { display: block; }
     .left-container, .right-container { width: 100%; }
   }
+  .bpx-player-container { background: #000; color: #fff; }
   .bpx-player-primary-area > video { display: none; }
   .bpx-player-ctrl-setting-box { padding: 12px; color: white; }
   .bui-panel-wrap { width: 286px; }
@@ -61,6 +70,10 @@
   input, select, [contenteditable] { background: #222; color: #fff; font: inherit; border: 1px solid #777; max-width: 100%; }
   .editors { display: grid; gap: 8px; margin: 24px; }
 </style>
+<header class="bili-header"><div class="bili-header__bar">
+  <a href="#fixture">Bilibili</a>
+  <form id="nav-searchform" role="search"><input class="nav-search-input" aria-label="搜尋測試" placeholder="搜尋影片"></form>
+</div></header>
 <main>
   <h1>劇場控制列</h1>
   <p>劇場按鈕位於寬屏左側；點擊或按 T 切換。</p>
@@ -73,8 +86,42 @@
   <p id="summary" role="status">準備測試</p>
   <ol id="results"></ol>
 </main>
+<template id="bewly-fixture">
+  <style>
+    :host { --bew-bg: #fff; --bew-content-opacity: .68; --bew-text-1: #15181e; --bew-text-2: #455566; --bew-elevated-solid: #fff; --bew-elevated: #fff; --bew-border-color: #ddd; --bew-theme-color: #b13246; --bew-theme-color-10: color-mix(in oklab, var(--bew-theme-color), transparent 90%); --bew-top-bar-height: 64px; --bew-shadow-1: 0 2px 4px #0001; --bew-shadow-edge-glow-1: inset 0 0 10px #fff9; color: var(--bew-text-1); }
+    :host(#bewly.dark), :root.dark { --bew-bg: hsl(230 12% 4%); --bew-text-1: hsl(215 19% 98%); --bew-text-2: #c9ccd0; --bew-elevated-solid: #22252b; --bew-elevated: #22252b; --bew-content: #191b20; --bew-shadow-1: 0 4px 6px #0003; --bew-shadow-edge-glow-1: inset 0 0 10px #ffffff0a; }
+    :host(#bewly.disable-shadow), :root.disable-shadow { --bew-shadow-1: 0 0 0 transparent; }
+    :host(#bewly.disable-frosted-glass), :root.disable-frosted-glass { --bew-shadow-edge-glow-1: 0 0 0 transparent; }
+    .dark input { color-scheme: dark; }
+    header:has(> main) { position: relative; background: var(--bew-bg); }
+    main { height: 64px; display: flex; align-items: center; gap: 24px; padding-inline: 24px; }
+    .logo { color: var(--bew-theme-color); }
+    .search-bar { --b-search-bar-normal-color: color-mix(in oklab, var(--bew-elevated-solid), transparent 60%); --b-search-bar-normal-text-color: var(--bew-text-1); }
+    input { background: var(--b-search-bar-normal-color); color: var(--b-search-bar-normal-text-color); border: 1px solid var(--bew-border-color); border-radius: 60px; padding: 8px 16px; width: 160px; box-shadow: var(--bew-shadow-1); }
+    .bew-popover { background: var(--bew-elevated); color: var(--bew-text-2); }
+    .other-panel { background: var(--bew-bg); color: var(--bew-text-1); }
+    .bew-popover, .other-panel { position: absolute; visibility: hidden; }
+  </style>
+  <div id="bewly-wrapper"><div>
+    <header><main h="$bew-top-bar-height"><span class="logo">Bewly</span><div class="search-bar"><input aria-label="Bewly 搜尋" placeholder="搜尋影片"></div><div class="bew-popover">搜尋建議</div></main></header>
+  </div><section class="other-panel"><header>頂欄以外的面板</header></section></div>
+</template>
+<template id="bewly-settings-fixture">
+  <section hidden>
+    <div class="b-settings-item"><div>
+      <div class="left-content"><div>在顶栏显示主题色渐变（仅在暗色模式下有效）</div><div></div></div>
+      <div class="right-content"><label><input type="checkbox" hidden><span>切換漸層</span></label></div>
+    </div></div>
+    <div class="b-settings-item"><div>
+      <div class="left-content"><div>其他設定</div><div>在顶栏显示主题色渐变</div></div>
+      <div class="right-content"><label><input type="checkbox" hidden><span>其他開關</span></label></div>
+    </div></div>
+  </section>
+</template>
 <script>
   window.testPrefs = new Map([['showBtn', false], ['darkMode', new URLSearchParams(location.search).get('lights') !== 'off'], ['theaterOn', new URLSearchParams(location.search).get('saved') === 'true']]);
+  const savedGradient = new URLSearchParams(location.search).get('gradient');
+  if (savedGradient) testPrefs.set('bewlyThemeGradient', savedGradient === 'on');
   window.testMenus = new Map();
   window.GM_getValue = (key, fallback) => testPrefs.has(key) ? testPrefs.get(key) : fallback;
   window.GM_setValue = (key, value) => testPrefs.set(key, value);

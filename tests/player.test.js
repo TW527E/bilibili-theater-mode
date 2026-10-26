@@ -15,6 +15,30 @@
   const player = () => document.querySelector('.bpx-player-container');
   const active = () => button()?.getAttribute('aria-pressed') === 'true';
   const style = () => document.querySelector('#bili-theater-style');
+  const headerColors = () => ['.bili-header__bar', '#nav-searchform', '.nav-search-input'].map(sel => {
+    const css = getComputedStyle(document.querySelector(sel));
+    return [css.backgroundColor, css.color];
+  });
+  const originalHeaderColors = JSON.stringify(headerColors());
+  const originalBodyColor = getComputedStyle(document.body).backgroundColor;
+  function makeBewly() {
+    document.querySelector('#bewly')?.remove();
+    const host = document.createElement('div'); host.id = 'bewly';
+    host.attachShadow({mode: 'open'}).append(document.querySelector('#bewly-fixture').content.cloneNode(true));
+    document.querySelector('.bili-header').after(host);
+    document.documentElement.classList.add('test-bewly');
+  }
+  const bewlyColors = () => {
+    const root = document.querySelector('#bewly').shadowRoot;
+    return ['header:has(> main)', 'input', '.bew-popover', '.other-panel', '.logo'].map(sel => {
+      const css = getComputedStyle(root.querySelector(sel));
+      return [css.backgroundColor, css.color];
+    });
+  };
+  makeBewly();
+  const originalBewlyColors = JSON.stringify(bewlyColors());
+  document.querySelector('#bewly').remove();
+  document.documentElement.classList.remove('test-bewly');
   const key = (target = document.body, options = {}) => target.dispatchEvent(new KeyboardEvent('keydown', {
     key: 't', bubbles: true, composed: true, cancelable: true, ...options,
   }));
@@ -131,6 +155,86 @@
     const originalBarWidth = player().querySelector('.bpx-player-sending-bar').getBoundingClientRect().width;
     button().click(); await settle();
     check(active() && !style().disabled && player().dataset.screen === 'wide', '按鈕開啟劇場與寬屏');
+    check(headerColors()[0][0] === 'rgb(35, 37, 40)' && headerColors()[0][1] === 'rgb(241, 242, 243)' && headerColors()[1][0] === 'rgb(47, 49, 52)' && headerColors()[2][1] === 'rgb(201, 204, 208)', '劇場導覽列與搜尋框套用深色，文字維持可讀');
+    check(getComputedStyle(document.body).backgroundColor === originalBodyColor && getComputedStyle(document.querySelector('#fixture')).backgroundColor === originalBodyColor && getComputedStyle(document.documentElement).getPropertyValue('--bg1').trim() === '#fff', '劇場導覽列配色不影響淺色內容區與全站主題');
+    check(!document.querySelector('#bewly') && !document.querySelector('.bili-header').classList.contains('dark'), '未安裝 Bewly 時原生頂欄仍獨立運作');
+    makeBewly(); await settle();
+    const darkBewlyColors = JSON.stringify(bewlyColors());
+    check(bewlyColors()[0][0] === 'rgb(9, 9, 11)' && bewlyColors()[0][1] === 'rgb(249, 250, 251)' && bewlyColors()[1][1] === 'rgb(249, 250, 251)', '延遲載入的 Bewly Shadow DOM 頂欄及搜尋文字套用深色');
+    check(bewlyColors()[2][0] !== 'rgb(255, 255, 255)' && bewlyColors()[3][0] === 'rgb(255, 255, 255)' && bewlyColors()[4][1] === 'rgb(177, 50, 70)' && !document.querySelector('#bewly').classList.contains('dark'), '只深色化 Bewly 頂欄與其選單，保留其他面板、主題色及全站主題');
+    check(headerColors()[0][0] === 'rgb(25, 27, 32)', 'Bewly 使用原生頂欄時也套用它的深色背景變數');
+    const bewlyRoot = document.querySelector('#bewly').shadowRoot;
+    let bewlyHeader = bewlyRoot.querySelector('header:has(> main)');
+    const gradient = () => getComputedStyle(bewlyHeader, '::after');
+    check((gradient().content !== 'none') === (savedGradient === 'on'), '未打開設定面板時沿用已儲存的漸層偏好，尚未讀到設定則不強制開啟');
+    const settingsPanel = document.querySelector('#bewly-settings-fixture').content.firstElementChild.cloneNode(true);
+    bewlyRoot.append(settingsPanel); await settle();
+    const gradientControl = settingsPanel.querySelector('input');
+    check(gradient().content === 'none' && testPrefs.get('bewlyThemeGradient') === false, '面板延遲載入後讀取關閉狀態，覆蓋舊偏好並儲存');
+    gradientControl.closest('label').click();
+    check(gradient().content !== 'none' && testPrefs.get('bewlyThemeGradient') === true, '點擊 Bewly 原生標籤立即啟用並保存局部漸層');
+    gradientControl.click();
+    check(gradient().content === 'none' && testPrefs.get('bewlyThemeGradient') === false, '關閉 Bewly 漸層開關立即移除局部漸層並保存');
+    for (const title of ['在頂欄顯示主題色漸變（僅在深色模式下有效）', 'Show theme color gradient in top bar (only works in dark mode)', '喺頂部欄顯示主題色漸變（淨係喺深色模式下有效）']) {
+      settingsPanel.querySelector('.left-content > div').textContent = title;
+      gradientControl.click();
+      check(gradient().content !== 'none' && testPrefs.get('bewlyThemeGradient') === true, `${title}：讀取原生開關`);
+      gradientControl.click();
+    }
+    gradientControl.click();
+    settingsPanel.querySelectorAll('input')[1].click();
+    check(gradient().content !== 'none' && testPrefs.get('bewlyThemeGradient') === true, '其他設定及說明中的相似文字不會改變漸層偏好');
+    settingsPanel.remove(); await settle();
+    check(gradient().content !== 'none', '關閉設定面板後保留最後讀到的漸層偏好');
+    gradientControl.checked = false;
+    bewlyRoot.append(settingsPanel); await settle();
+    check(gradient().content === 'none' && testPrefs.get('bewlyThemeGradient') === false, '重新開啟設定面板時重新讀取實際值');
+    gradientControl.click(); settingsPanel.remove(); await settle();
+    const originalGradient = gradient().backgroundImage;
+    check(gradient().content === '""' && originalGradient.includes('linear-gradient') && gradient().height === '64px' && gradient().pointerEvents === 'none', '劇場頂欄顯示 Bewly 主題漸層，範圍限於頂欄且不攔截操作');
+    check(getComputedStyle(document.body).backgroundColor === originalBodyColor && getComputedStyle(document.body).backgroundImage === 'none' && getComputedStyle(bewlyRoot.querySelector('.other-panel'), '::after').content === 'none' && getComputedStyle(document.querySelector('.bili-header'), '::after').content === 'none', '主題漸層不影響淺色內容區、其他面板或原生頂欄');
+    document.querySelector('#bewly').style.setProperty('--bew-theme-color', '#00aaff');
+    check(gradient().backgroundImage !== originalGradient, '漸層即時跟隨 Bewly 主題色');
+    document.querySelector('#bewly').style.removeProperty('--bew-theme-color');
+    const scrollMask = document.createElement('div'); scrollMask.style.maskImage = 'linear-gradient(black, transparent)';
+    bewlyHeader.querySelector('main').prepend(scrollMask); await settle();
+    check(gradient().content === 'none', '沿用 Bewly 捲動遮罩狀態，離開頁首便收起漸層');
+    scrollMask.remove(); await settle();
+    check(gradient().backgroundImage === originalGradient, '回到頁首恢復主題漸層');
+    bewlyHeader.classList.add('force-white-icon');
+    check(gradient().content === 'none', '保留 Bewly 強制白色圖示時不顯示主題漸層的行為');
+    bewlyHeader.classList.remove('force-white-icon');
+    document.querySelector('#bewly').classList.add('dark');
+    check(gradient().content === 'none', 'Bewly 自己啟用全站深色時交回原生漸層，避免疊加');
+    document.querySelector('#bewly').classList.remove('dark');
+    const themeStyle = bewlyRoot.querySelector('#bili-theater-bewly-style');
+    let themeWrites = 0;
+    const themeObserver = new MutationObserver(records => { themeWrites += records.length; });
+    themeObserver.observe(themeStyle, {childList: true});
+    themeStyle.dispatchEvent(new Event('load')); await settle();
+    check(themeWrites === 0, '忽略自身 style 的 load 事件，避免主題重建循環');
+    themeObserver.disconnect();
+    const themeRule = [...bewlyRoot.querySelector('style').sheet.cssRules].find(rule => rule.selectorText?.includes(':host(#bewly.dark)'));
+    const originalBg = themeRule.style.getPropertyValue('--bew-bg');
+    themeRule.style.setProperty('--bew-bg', '#202226');
+    const lateSheet = document.createElement('link'); lateSheet.rel = 'stylesheet'; bewlyRoot.append(lateSheet);
+    lateSheet.dispatchEvent(new Event('load')); await settle();
+    check(bewlyColors()[0][0] === 'rgb(32, 34, 38)', '樣式表載入後重新讀取已安裝版本的深色規則');
+    themeRule.style.setProperty('--bew-bg', originalBg); lateSheet.dispatchEvent(new Event('load')); await settle();
+    check(getComputedStyle(bewlyRoot.querySelector('input')).colorScheme === 'dark' && getComputedStyle(bewlyRoot.querySelector('input')).boxShadow.includes('0px 4px 6px') && getComputedStyle(bewlyHeader).getPropertyValue('--bew-shadow-edge-glow-1').includes('#ffffff0a'), '沿用已載入的原生深色控件、陰影及磨砂邊緣規則');
+    document.querySelector('#bewly').classList.add('disable-shadow', 'disable-frosted-glass');
+    check(getComputedStyle(bewlyRoot.querySelector('input')).boxShadow.includes('0px 0px 0px') && getComputedStyle(bewlyHeader).getPropertyValue('--bew-shadow-edge-glow-1').includes('transparent'), '保留使用者停用陰影和磨砂效果的設定');
+    document.querySelector('#bewly').classList.remove('disable-shadow', 'disable-frosted-glass');
+    bewlyHeader.className = ''; await settle();
+    check(bewlyHeader.classList.contains('dark'), 'Vue 更新頂欄 class 後維持局部深色');
+    bewlyHeader.replaceWith(bewlyHeader.cloneNode(true)); await settle();
+    check(!bewlyHeader.classList.contains('dark'), '頂欄替換後清除舊節點的腳本樣式狀態');
+    bewlyHeader = bewlyRoot.querySelector('header:has(> main)');
+    bewlyHeader.classList.remove('dark'); await settle();
+    check(bewlyHeader.classList.contains('dark'), 'Shadow DOM 內頂欄替換後重新套用深色控件');
+    makeBewly(); await settle();
+    check(JSON.stringify(bewlyColors()) === darkBewlyColors, 'Bewly Shadow DOM 替換後自動恢復頂欄深色');
+    check(getComputedStyle(document.querySelector('#bewly').shadowRoot.querySelector('header:has(> main)'), '::after').content !== 'none', 'Bewly 重建後沿用已讀取的漸層偏好');
     checkDetails('劇場模式');
     check(document.querySelector('.right-container').getBoundingClientRect().top >= document.querySelector('#playerWrap').getBoundingClientRect().bottom, '劇場推薦欄從播放器下方開始');
     const danmakuRect = document.querySelector('.danmaku-box').getBoundingClientRect();
@@ -150,6 +254,10 @@
     check(Math.abs(upAfterExit.top - titleAfterExit.bottom - 16) < 1, '切換模式立即對齊 UP 主，不等待下一個繪製影格');
     await settle();
     check(!active() && style().disabled && player().dataset.screen === 'normal', '退出還原一般模式');
+    check(JSON.stringify(headerColors()) === originalHeaderColors, '退出劇場後導覽列及搜尋框還原原本配色');
+    check(JSON.stringify(bewlyColors()) === originalBewlyColors, '退出劇場後 Bewly 頂欄、搜尋框與選單還原原本配色');
+    check(!document.querySelector('.bili-header').classList.contains('dark') && !document.querySelector('#bewly').shadowRoot.querySelector('header:has(> main)').classList.contains('dark'), '退出後清除腳本加入的局部 dark class');
+    check(getComputedStyle(document.querySelector('#bewly').shadowRoot.querySelector('header:has(> main)'), '::after').content === 'none', '退出劇場後清除主題漸層');
     checkDetails('退出劇場後');
     check(testPrefs.get('theaterOn') === false, '手動關閉後保存關閉偏好');
     check(player().querySelector('.bpx-player-sending-bar').getBoundingClientRect().width === originalBarWidth, '退出後彈幕列還原原生寬度');
@@ -157,6 +265,7 @@
     const beforeWideClick = wideClicks;
     player().querySelector('.bpx-player-ctrl-wide path').dispatchEvent(new MouseEvent('click', {bubbles:true}));
     check(!active() && style().disabled && testPrefs.get('theaterOn') === false, '點擊原生寬屏圖示立即退出劇場並儲存關閉偏好');
+    check(JSON.stringify(bewlyColors()) === originalBewlyColors, '原生寬屏立即還原 Bewly 頂欄');
     await settle();
     check(wideClicks === beforeWideClick + 1 && player().dataset.screen === 'normal', '手動寬屏只執行一次原生切換，不觸發額外還原');
     check(player().querySelector('.bpx-player-sending-bar').getBoundingClientRect().width === originalBarWidth, '手動寬屏後移除劇場尺寸覆寫');
@@ -179,9 +288,13 @@
     for (const screen of ['web', 'full', 'mini']) {
       player().dataset.screen = screen; await settle(); key();
       check(style().disabled && active() && button().disabled && testPrefs.get('theaterOn') === true, `${screen} 暫停布局且不搶快捷鍵、不改寫偏好`);
+      check(JSON.stringify(headerColors()) === originalHeaderColors, `${screen} 同時暫停劇場導覽列配色`);
+      check(JSON.stringify(bewlyColors()) === originalBewlyColors, `${screen} 同時暫停 Bewly 頂欄配色`);
+      check(getComputedStyle(document.querySelector('#bewly').shadowRoot.querySelector('header:has(> main)'), '::after').content === 'none', `${screen} 同時暫停主題漸層`);
     }
     player().dataset.screen = 'wide'; await settle();
     check(!style().disabled && !button().disabled, '離開全屏與小窗後恢復劇場');
+    check(JSON.stringify(bewlyColors()) === darkBewlyColors, '離開全屏與小窗後恢復 Bewly 深色頂欄');
     const previous = button(); previous.remove(); await settle();
     check(button() === previous && document.querySelectorAll('#bili-theater-btn').length === 1, '控制列移除按鈕後只補回一個');
     makePlayer(); await settle();
