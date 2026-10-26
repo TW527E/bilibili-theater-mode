@@ -1,6 +1,6 @@
 # B 站剧场模式
 
-[繁體中文](README.md) · **简体中文** · [English](README.en.md)
+[繁體中文](https://github.com/TW527E/bilibili-theater-mode/blob/main/README.md) · **简体中文** · [English](https://github.com/TW527E/bilibili-theater-mode/blob/main/README.en.md)
 
 为 Bilibili 桌面版普通投稿视频加入类似 YouTube 的剧场模式。播放器横向铺满，标题、视频信息与 UP 主资料排列在播放器下方，推荐视频与评论保留。
 
@@ -8,11 +8,13 @@
 
 ## 安装与更新
 
+也可从 [GreasyFork](https://greasyfork.org/scripts/602246) 安装。GreasyFork 已设置从本仓库的 `main` 分支定时自动同步脚本与说明；更新不一定在推送后立即出现。请选择一个来源安装，避免重复启用。
+
 1. 安装 [Tampermonkey](https://www.tampermonkey.net/) 等用户脚本管理器。
 2. [安装 B 站剧场模式](https://raw.githubusercontent.com/TW527E/bilibili-theater-mode/main/bili-theater.user.js)，在脚本管理器中确认安装。
 3. 刷新 Bilibili 视频页面。
 
-如果链接只显示代码，可在脚本管理器中新建脚本，粘贴 [bili-theater.user.js](bili-theater.user.js) 的完整内容并保存。已安装上游版或本地审核版时，请更新或替换原有脚本，并确认只启用一份。
+如果链接只显示代码，可在脚本管理器中新建脚本，粘贴 [bili-theater.user.js](https://github.com/TW527E/bilibili-theater-mode/blob/main/bili-theater.user.js) 的完整内容并保存。已安装上游版或本地审核版时，请更新或替换原有脚本，并确认只启用一份。
 
 本 fork 保留原脚本的名称与 `@namespace`，便于原地更新并沿用偏好；安装本版后，更新来源改为 TW527E 的仓库。原先仍指向上游的安装需要手动更新一次。
 
@@ -76,8 +78,8 @@ python -m http.server 8765 --bind 127.0.0.1
 
 也可添加 `?gradient=on` 或 `?gradient=off` 检查已保存的 Bewly 渐变偏好。
 
-目前包含 **118 项浏览器断言**，覆盖模式切换与还原、宽屏交互、偏好保存、弹幕栏居中、信息排列、延迟初始化、换片、快捷键及自动关灯、原生与 Bewly 顶栏主题、主题渐变及设置面板同步。测试使用固定的播放器模拟页，不能替代实际 Bilibili 环境的兼容性检查。
+目前包含 **118 项浏览器断言**，覆盖模式切换与还原、宽屏交互、偏好保存、弹幕栏居中、信息排列、延迟初始化、换片、快捷键、自动关灯、原生与 Bewly 顶栏主题、主题渐变及设置面板同步。测试使用固定的播放器模拟页，不能替代实际 Bilibili 环境的兼容性检查。
 
 ## 许可与致谢
 
-采用 [MIT License](LICENSE)，保留上游版权声明。感谢 [astrytk](https://github.com/astrytk) 提供原始项目。
+采用 [MIT License](https://github.com/TW527E/bilibili-theater-mode/blob/main/LICENSE)，保留上游版权声明。感谢 [astrytk](https://github.com/astrytk) 提供原始项目。

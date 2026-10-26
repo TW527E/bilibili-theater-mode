@@ -1,6 +1,6 @@
 # Bilibili Theater Mode
 
-[繁體中文](README.md) · [简体中文](README.zh-CN.md) · **English**
+[繁體中文](https://github.com/TW527E/bilibili-theater-mode/blob/main/README.md) · [简体中文](https://github.com/TW527E/bilibili-theater-mode/blob/main/README.zh-CN.md) · **English**
 
 A userscript that adds a YouTube-style theater mode to regular videos on Bilibili's desktop website. The player spans the page, with the title, video information, and uploader details below it. Recommendations and comments remain available.
 
@@ -8,11 +8,13 @@ Forked from [astrytk/bilibili-theater-mode](https://github.com/astrytk/bilibili-
 
 ## Installation and updates
 
+You can also install from [GreasyFork](https://greasyfork.org/scripts/602246). GreasyFork periodically synchronizes the script and its description from this repository's `main` branch; updates may not appear immediately after a push. Install from one source to avoid duplicate active copies.
+
 1. Install a userscript manager such as [Tampermonkey](https://www.tampermonkey.net/).
 2. [Install Bilibili Theater Mode](https://raw.githubusercontent.com/TW527E/bilibili-theater-mode/main/bili-theater.user.js) and confirm installation in your userscript manager.
 3. Reload the Bilibili video page.
 
-If the link displays source code, create a script in your manager, paste the full contents of [bili-theater.user.js](bili-theater.user.js), and save. If you already use the upstream version or a local review copy, update or replace that script and keep only one copy enabled.
+If the link displays source code, create a script in your manager, paste the full contents of [bili-theater.user.js](https://github.com/TW527E/bilibili-theater-mode/blob/main/bili-theater.user.js), and save. If you already use the upstream version or a local review copy, update or replace that script and keep only one copy enabled.
 
 This fork retains the original script name and `@namespace` to support updating an existing installation and retaining preferences. Once installed, updates come from TW527E's repository. Installations that still point to upstream need a one-time manual update.
 
@@ -80,4 +82,4 @@ The suite currently contains **118 browser assertions** covering mode changes an
 
 ## License and credits
 
-Released under the [MIT License](LICENSE), retaining the upstream copyright notice. Thanks to [astrytk](https://github.com/astrytk) for the original project.
+Released under the [MIT License](https://github.com/TW527E/bilibili-theater-mode/blob/main/LICENSE), retaining the upstream copyright notice. Thanks to [astrytk](https://github.com/astrytk) for the original project.
