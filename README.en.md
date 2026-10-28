@@ -4,7 +4,7 @@
 
 A userscript that adds a YouTube-style theater mode to regular videos on Bilibili's desktop website. The player spans the page, with the title, video information, and uploader details below it. Recommendations and comments remain available.
 
-Forked from [astrytk/bilibili-theater-mode](https://github.com/astrytk/bilibili-theater-mode), with subsequent changes maintained by TW527E. Current version: **0.3.10**.
+Forked from [astrytk/bilibili-theater-mode](https://github.com/astrytk/bilibili-theater-mode), with subsequent changes maintained by TW527E. Current version: **0.3.11**.
 
 ## Installation and updates
 
@@ -46,14 +46,14 @@ Exiting with the theater button or `T` restores the normal/wide-screen state fro
 
 ## Bewly top bar compatibility
 
-Verified with [BewlyBewly-AveMujica](https://github.com/VentusUta/BewlyBewly-AveMujica). Theater mode reuses the installed version's dark variables, shadows, frosted-glass effects, and theme color for the top bar and its menus. It does not enable the global dark theme. The native Bilibili top bar works independently when Bewly is absent.
+Verified with [BewlyBewly-AveMujica](https://github.com/VentusUta/BewlyBewly-AveMujica) and [BewlyCat](https://github.com/keleus/BewlyCat). Theater mode reuses the installed version's dark variables, shadows, frosted-glass effects, and theme color for the top bar and its menus. It does not enable the global dark theme. The native Bilibili top bar works independently when Bewly is absent.
 
-The theme gradient follows Bewly's **Show theme color gradient in top bar** switch under **Desktop and Dock**:
+The theme gradient follows the native **Show theme color gradient in top bar** switch: under **Desktop and Dock** in Bewly, or **Bewly Components → Top bar** in BewlyCat.
 
 - On first use, open that settings panel on the video page once so the script can read the actual preference. No custom gradient appears until the preference is known.
 - Changes made in the same page apply immediately. The userscript manager remembers the last observed value.
-- The gradient is limited to the theater top bar and follows Bewly's page-top and forced-white-icon conditions. When the global dark theme is active, Bewly manages its own gradient.
-- Bewly does not expose a public interface for this preference, so changes in other tabs are not guaranteed to synchronize. Reopen the settings panel on this page to refresh the value. Future changes to setting labels or markup may require an update.
+- The gradient is limited to the theater top bar and hides when leaving the top of the page. BewlyCat retains its newer white-icon behavior and stronger accent gradient for experimental frosted-glass styles. When the global dark theme is active, the extension manages its own gradient.
+- Neither Bewly nor BewlyCat currently exposes this preference to page scripts, so changes in other tabs are not guaranteed to synchronize. Reopen the settings panel on this page to refresh the value. Future changes to setting labels or markup may require an update.
 
 ## Scope and compatibility
 
@@ -76,9 +76,9 @@ python -m http.server 8765 --bind 127.0.0.1
 
 Open the [test page](http://127.0.0.1:8765/tests/player.html). Tests run automatically and display their results. Add `?saved=true` to test a saved theater preference, or `?lights=off` to test a disabled legacy lights preference.
 
-Use `?gradient=on` or `?gradient=off` to test a saved Bewly gradient preference.
+Use `?gradient=on` or `?gradient=off` to test a saved Bewly gradient preference. Use `?bewly=cat` for the BewlyCat fixture; combine parameters with `&`.
 
-The suite currently contains **118 browser assertions** covering mode changes and restoration, native wide-screen interaction, stored preferences, centered danmaku controls, details layout, delayed initialization, player replacement, keyboard shortcuts, automatic lights off, native and Bewly header themes, theme gradients, and settings-panel synchronization. It uses a fixed player fixture and does not replace compatibility checks on the real Bilibili website.
+The suite contains **118 browser assertions for original Bewly** and **124 for BewlyCat** covering mode changes and restoration, native wide-screen interaction, stored preferences, centered danmaku controls, details layout, delayed initialization, player replacement, keyboard shortcuts, automatic lights off, native and Bewly header themes, theme gradients, and settings-panel synchronization. Cat checks also cover masks, custom dark bases, and settings-panel positioning. It uses a fixed player fixture and does not replace compatibility checks on the real Bilibili website.
 
 ## License and credits
 

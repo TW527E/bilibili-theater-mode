@@ -21,10 +21,24 @@
   });
   const originalHeaderColors = JSON.stringify(headerColors());
   const originalBodyColor = getComputedStyle(document.body).backgroundColor;
+  const isBewlyCat = new URLSearchParams(location.search).get('bewly') === 'cat';
   function makeBewly() {
     document.querySelector('#bewly')?.remove();
     const host = document.createElement('div'); host.id = 'bewly';
     host.attachShadow({mode: 'open'}).append(document.querySelector('#bewly-fixture').content.cloneNode(true));
+    if (isBewlyCat) {
+      const root = host.shadowRoot;
+      const theme = root.querySelector('style');
+      theme.textContent = theme.textContent.replaceAll(':host(#bewly.', ':host(.').replace('.dark input', ':host(.dark) input')
+        + ':host(.settings-open) { position: relative; z-index: 10003; }';
+      const main = root.querySelector('header > main');
+      main.className = 'top-bar-header';
+      const mask = document.createElement('div'); mask.className = 'top-bar-header__legacy-mask';
+      mask.style.opacity = '0';
+      const fog = document.createElement('div'); fog.className = 'top-bar-header__fog';
+      fog.style.cssText = 'background: linear-gradient(to bottom, var(--bew-bg), transparent); opacity: 0.8; height: var(--bew-top-bar-height);';
+      main.prepend(mask, fog);
+    }
     document.querySelector('.bili-header').after(host);
     document.documentElement.classList.add('test-bewly');
   }
@@ -166,6 +180,12 @@
     const bewlyRoot = document.querySelector('#bewly').shadowRoot;
     let bewlyHeader = bewlyRoot.querySelector('header:has(> main)');
     const gradient = () => getComputedStyle(bewlyHeader, '::after');
+    if (isBewlyCat) {
+      const beforeLayer = getComputedStyle(bewlyHeader).zIndex;
+      bewlyRoot.host.classList.add('settings-open'); await settle();
+      check(getComputedStyle(bewlyHeader).zIndex === beforeLayer, 'BewlyCat 開啟設定面板時不將宿主的定位和層級套到頂欄');
+      bewlyRoot.host.classList.remove('settings-open');
+    }
     check((gradient().content !== 'none') === (savedGradient === 'on'), '未打開設定面板時沿用已儲存的漸層偏好，尚未讀到設定則不強制開啟');
     const settingsPanel = document.querySelector('#bewly-settings-fixture').content.firstElementChild.cloneNode(true);
     bewlyRoot.append(settingsPanel); await settle();
@@ -196,14 +216,33 @@
     document.querySelector('#bewly').style.setProperty('--bew-theme-color', '#00aaff');
     check(gradient().backgroundImage !== originalGradient, '漸層即時跟隨 Bewly 主題色');
     document.querySelector('#bewly').style.removeProperty('--bew-theme-color');
-    const scrollMask = document.createElement('div'); scrollMask.style.maskImage = 'linear-gradient(black, transparent)';
-    bewlyHeader.querySelector('main').prepend(scrollMask); await settle();
-    check(gradient().content === 'none', '沿用 Bewly 捲動遮罩狀態，離開頁首便收起漸層');
-    scrollMask.remove(); await settle();
-    check(gradient().backgroundImage === originalGradient, '回到頁首恢復主題漸層');
-    bewlyHeader.classList.add('force-white-icon');
-    check(gradient().content === 'none', '保留 Bewly 強制白色圖示時不顯示主題漸層的行為');
-    bewlyHeader.classList.remove('force-white-icon');
+    if (isBewlyCat) {
+      const fog = bewlyHeader.querySelector('.top-bar-header__fog');
+      fog.style.opacity = '0.9';
+      check(gradient().content === 'none', 'BewlyCat 常駐雲霧離開頁首時收起漸層');
+      fog.style.opacity = '0.8';
+      check(gradient().backgroundImage === originalGradient, 'BewlyCat 回到頁首恢復漸層');
+      const glass = document.createElement('div'); glass.className = 'top-bar-header__glass-overlay';
+      glass.style.maskImage = 'linear-gradient(black, transparent)';
+      bewlyHeader.querySelector('main').prepend(glass); await settle();
+      check(gradient().content !== 'none' && gradient().backgroundImage !== originalGradient, 'BewlyCat 實驗毛玻璃遮罩不誤判捲動，沿用較深的 20% 主題色');
+      bewlyHeader.classList.add('force-white-icon');
+      check(gradient().content !== 'none', 'BewlyCat 沿用新版白圖示也允許顯示漸層的行為');
+      bewlyHeader.classList.remove('force-white-icon');
+      fog.style.opacity = '1';
+      check(gradient().content === 'none', 'BewlyCat 實驗毛玻璃離開頁首仍收起漸層');
+      fog.style.opacity = '0.8'; glass.remove(); await settle();
+      check(gradient().backgroundImage === originalGradient, 'BewlyCat 返回舊版樣式恢復 10% 主題色');
+    } else {
+      const scrollMask = document.createElement('div'); scrollMask.style.maskImage = 'linear-gradient(black, transparent)';
+      bewlyHeader.querySelector('main').prepend(scrollMask); await settle();
+      check(gradient().content === 'none', '沿用 Bewly 捲動遮罩狀態，離開頁首便收起漸層');
+      scrollMask.remove(); await settle();
+      check(gradient().backgroundImage === originalGradient, '回到頁首恢復主題漸層');
+      bewlyHeader.classList.add('force-white-icon');
+      check(gradient().content === 'none', '保留 Bewly 強制白色圖示時不顯示主題漸層的行為');
+      bewlyHeader.classList.remove('force-white-icon');
+    }
     document.querySelector('#bewly').classList.add('dark');
     check(gradient().content === 'none', 'Bewly 自己啟用全站深色時交回原生漸層，避免疊加');
     document.querySelector('#bewly').classList.remove('dark');
@@ -214,13 +253,26 @@
     themeStyle.dispatchEvent(new Event('load')); await settle();
     check(themeWrites === 0, '忽略自身 style 的 load 事件，避免主題重建循環');
     themeObserver.disconnect();
-    const themeRule = [...bewlyRoot.querySelector('style').sheet.cssRules].find(rule => rule.selectorText?.includes(':host(#bewly.dark)'));
+    const themeRule = [...bewlyRoot.querySelector('style').sheet.cssRules].find(rule => rule.selectorText?.includes(isBewlyCat ? ':host(.dark)' : ':host(#bewly.dark)'));
     const originalBg = themeRule.style.getPropertyValue('--bew-bg');
     themeRule.style.setProperty('--bew-bg', '#202226');
     const lateSheet = document.createElement('link'); lateSheet.rel = 'stylesheet'; bewlyRoot.append(lateSheet);
     lateSheet.dispatchEvent(new Event('load')); await settle();
     check(bewlyColors()[0][0] === 'rgb(32, 34, 38)', '樣式表載入後重新讀取已安裝版本的深色規則');
     themeRule.style.setProperty('--bew-bg', originalBg); lateSheet.dispatchEvent(new Event('load')); await settle();
+    if (isBewlyCat) {
+      themeRule.style.setProperty('--bew-dark-base-color', '#2a2d32');
+      themeRule.style.setProperty('--bew-bg', 'color-mix(in oklab, var(--bew-dark-base-color), black 20%)');
+      bewlyRoot.host.style.setProperty('--bew-dark-base-color', '#556677');
+      lateSheet.dispatchEvent(new Event('load')); await settle();
+      check(getComputedStyle(bewlyHeader).getPropertyValue('--bew-dark-base-color').trim() === '#556677', 'BewlyCat 使用者自訂深色基底不被預設值蓋掉');
+      const beforeBase = getComputedStyle(bewlyHeader).backgroundColor;
+      bewlyRoot.host.style.setProperty('--bew-dark-base-color', '#665544');
+      check(getComputedStyle(bewlyHeader).backgroundColor !== beforeBase, 'BewlyCat 深色頂欄即時跟隨原生深色基底');
+      themeRule.style.removeProperty('--bew-dark-base-color');
+      themeRule.style.setProperty('--bew-bg', originalBg);
+      lateSheet.dispatchEvent(new Event('load')); await settle();
+    }
     check(getComputedStyle(bewlyRoot.querySelector('input')).colorScheme === 'dark' && getComputedStyle(bewlyRoot.querySelector('input')).boxShadow.includes('0px 4px 6px') && getComputedStyle(bewlyHeader).getPropertyValue('--bew-shadow-edge-glow-1').includes('#ffffff0a'), '沿用已載入的原生深色控件、陰影及磨砂邊緣規則');
     document.querySelector('#bewly').classList.add('disable-shadow', 'disable-frosted-glass');
     check(getComputedStyle(bewlyRoot.querySelector('input')).boxShadow.includes('0px 0px 0px') && getComputedStyle(bewlyHeader).getPropertyValue('--bew-shadow-edge-glow-1').includes('transparent'), '保留使用者停用陰影和磨砂效果的設定');

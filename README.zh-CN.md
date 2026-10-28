@@ -4,7 +4,7 @@
 
 为 Bilibili 桌面版普通投稿视频加入类似 YouTube 的剧场模式。播放器横向铺满，标题、视频信息与 UP 主资料排列在播放器下方，推荐视频与评论保留。
 
-此版本 fork 自 [astrytk/bilibili-theater-mode](https://github.com/astrytk/bilibili-theater-mode)，后续修改由 TW527E 维护。当前版本：**0.3.10**。
+此版本 fork 自 [astrytk/bilibili-theater-mode](https://github.com/astrytk/bilibili-theater-mode)，后续修改由 TW527E 维护。当前版本：**0.3.11**。
 
 ## 安装与更新
 
@@ -46,14 +46,14 @@
 
 ## Bewly 顶栏兼容性
 
-已针对 [BewlyBewly-AveMujica](https://github.com/VentusUta/BewlyBewly-AveMujica) 验证。剧场模式沿用已安装版本的深色变量、阴影、磨砂效果与主题色，只应用于顶栏及其菜单，不启用全站深色。未安装 Bewly 时，原生 Bilibili 顶栏仍可独立工作。
+已针对 [BewlyBewly-AveMujica](https://github.com/VentusUta/BewlyBewly-AveMujica) 与 [BewlyCat](https://github.com/keleus/BewlyCat) 验证。剧场模式沿用已安装版本的深色变量、阴影、磨砂效果与主题色，只应用于顶栏及其菜单，不启用全站深色。未安装 Bewly 时，原生 Bilibili 顶栏仍可独立工作。
 
-主题渐变跟随 Bewly“桌面和 Dock 栏”内的“在顶栏显示主题色渐变”开关：
+主题渐变跟随原生“在顶栏显示主题色渐变”开关：Bewly 位于“桌面和 Dock 栏”，BewlyCat 位于“Bewly 组件 → 顶栏”。
 
 - 首次使用请在视频页打开一次该设置面板，让脚本读取实际值；尚未读取设置时不显示自定义渐变。
 - 在同一页切换开关会立即同步，并由脚本管理器记住最后读取的值。
-- 渐变仅显示在剧场顶栏，并沿用 Bewly 的页首及强制白色图标条件；全站深色时交回 Bewly 自己处理。
-- Bewly 尚未提供此偏好的公开接口，因此其他标签页的变更不保证自动同步。重新打开本页设置面板即可重新读取；未来设置文字或结构变更可能需要重新适配。
+- 渐变仅显示在剧场顶栏，离开页首后收起。BewlyCat 保留新版白色图标条件，实验毛玻璃样式沿用较深的主题色渐变；全站深色时交回扩展自己处理。
+- Bewly 与 BewlyCat 目前都未提供此偏好的页面公开接口，因此其他标签页的变更不保证自动同步。重新打开本页设置面板即可重新读取；未来设置文字或结构变更可能需要重新适配。
 
 ## 适用范围
 
@@ -76,9 +76,9 @@ python -m http.server 8765 --bind 127.0.0.1
 
 打开 [测试页](http://127.0.0.1:8765/tests/player.html)；测试会自动执行并显示结果。可添加 `?saved=true` 检查已保存的剧场偏好，或 `?lights=off` 检查旧版关灯偏好为关闭的情况。
 
-也可添加 `?gradient=on` 或 `?gradient=off` 检查已保存的 Bewly 渐变偏好。
+也可添加 `?gradient=on` 或 `?gradient=off` 检查已保存的 Bewly 渐变偏好；使用 `?bewly=cat` 测试 BewlyCat，参数可用 `&` 组合。
 
-目前包含 **118 项浏览器断言**，覆盖模式切换与还原、宽屏交互、偏好保存、弹幕栏居中、信息排列、延迟初始化、换片、快捷键、自动关灯、原生与 Bewly 顶栏主题、主题渐变及设置面板同步。测试使用固定的播放器模拟页，不能替代实际 Bilibili 环境的兼容性检查。
+原版 Bewly 包含 **118 项浏览器断言**，BewlyCat 包含 **124 项**，覆盖模式切换与还原、宽屏交互、偏好保存、弹幕栏居中、信息排列、延迟初始化、换片、快捷键、自动关灯、原生与 Bewly 顶栏主题、主题渐变及设置面板同步；另检查 BewlyCat 遮罩、自定义深色基底及设置面板定位。测试使用固定的播放器模拟页，不能替代实际 Bilibili 环境的兼容性检查。
 
 ## 许可与致谢
 
