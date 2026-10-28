@@ -2,7 +2,7 @@
 // @name         B站剧场模式
 // @name:zh-CN   B站剧场模式
 // @namespace    https://github.com/astrytk/bilibili-theater-mode
-// @version      0.3.10
+// @version      0.3.11
 // @description  为B站普通投稿视频添加类YouTube剧场模式。点击播放器控制栏的剧场按钮或按 T 键切换。
 // @description:zh-CN  为B站普通投稿视频添加类YouTube剧场模式。点击播放器控制栏的剧场按钮或按 T 键切换。
 // @author       astrytk, TW527E
@@ -182,25 +182,34 @@
         let rules;
         try { rules = sheet.cssRules; } catch { continue; }
         for (const rule of rules) {
-          const host = rule.selectorText?.match(/:host\(#bewly((?:\.[\w-]+)+)\)/);
+          const host = rule.selectorText?.match(/:host\((?:#bewly)?((?:\.[\w-]+)+)\)/);
           if (!host) continue;
           const options = host[1].replace(/\.dark\b/g, '');
-          css += `:is(:host(#bewly${options}), :root${options}) :is(.bili-header, ${BEWLY_HEADER}) {${rule.style.cssText}}\n`;
+          // 只投影主题变量，保留宿主布局及用户设置的深色基底。
+          const declarations = [...rule.style]
+            .filter(name => name.startsWith('--') && name !== '--bew-dark-base-color')
+            .map(name => `${name}: ${rule.style.getPropertyValue(name)}${rule.style.getPropertyPriority(name) ? ' !important' : ''};`).join(' ');
+          if (!declarations) continue;
+          css += `:is(:host(#bewly${options}), :root${options}) :is(.bili-header, ${BEWLY_HEADER}) {${declarations}}\n`;
         }
       }
       if (css) {
         // 局部深色时补上原本由全站深色背景提供的底色，避免透明顶栏透出白色。
-        css += `:is(.bili-header, ${BEWLY_HEADER}) { color: var(--bew-text-1); background: var(--bew-bg); }`;
-        // 使用原生滚动遮罩判断是否在页首；全站深色时保留 Bewly 自己的渐层。
+        css += `:is(.bili-header, ${BEWLY_HEADER}) { color: var(--bew-text-1); background: var(--bew-bg); color-scheme: dark; }`;
+        // Cat 用常驻雾层透明度表达页首，旧版用滚动遮罩；全站深色交回原生处理。
         css += `
-          :host(#bewly[data-bili-theater-gradient]:not(.dark)) ${BEWLY_HEADER}:not(.force-white-icon):not(:has(> main > [style*="mask-image"]))::after {
+          :host(#bewly[data-bili-theater-gradient]:not(.dark)) ${BEWLY_HEADER}:not(:has(> main.top-bar-header)):not(.force-white-icon):not(:has(> main > [style*="mask-image"]))::after,
+          :host(#bewly[data-bili-theater-gradient]:not(.dark)) ${BEWLY_HEADER}:has(> main.top-bar-header > .top-bar-header__fog[style*="opacity: 0.8;"])::after {
             content: "";
             position: absolute;
             inset: 0 0 auto;
             height: var(--bew-top-bar-height);
             z-index: 0;
             pointer-events: none;
-            background: linear-gradient(to bottom, var(--bew-theme-color-10), transparent);
+            background: linear-gradient(to bottom, var(--bili-theater-gradient-color, var(--bew-theme-color-10)), transparent);
+          }
+          :host(#bewly[data-bili-theater-gradient]:not(.dark)) ${BEWLY_HEADER}:has(> main.top-bar-header > .top-bar-header__glass-overlay) {
+            --bili-theater-gradient-color: var(--bew-theme-color-20);
           }
         `;
         bewlyStyle.textContent = css;

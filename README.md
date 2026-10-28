@@ -4,7 +4,7 @@
 
 為 Bilibili 桌面版一般投稿影片加入類似 YouTube 的劇場模式。播放器橫向鋪滿，標題、影片資訊與 UP 主資料排列在播放器下方，推薦影片與評論保留。
 
-此版本由 [astrytk/bilibili-theater-mode](https://github.com/astrytk/bilibili-theater-mode) fork，後續修改由 TW527E 維護。目前版本：**0.3.10**。
+此版本由 [astrytk/bilibili-theater-mode](https://github.com/astrytk/bilibili-theater-mode) fork，後續修改由 TW527E 維護。目前版本：**0.3.11**。
 
 ## 安裝與更新
 
@@ -46,14 +46,14 @@
 
 ## Bewly 頂欄相容性
 
-已針對 [BewlyBewly-AveMujica](https://github.com/VentusUta/BewlyBewly-AveMujica) 驗證。劇場模式沿用已安裝版本的深色變數、陰影、磨砂效果與主題色，只套用在頂欄及其選單，不啟用全站深色。未安裝 Bewly 時，原生 Bilibili 頂欄仍可獨立運作。
+已針對 [BewlyBewly-AveMujica](https://github.com/VentusUta/BewlyBewly-AveMujica) 與 [BewlyCat](https://github.com/keleus/BewlyCat) 驗證。劇場模式沿用已安裝版本的深色變數、陰影、磨砂效果與主題色，只套用在頂欄及其選單，不啟用全站深色。未安裝 Bewly 時，原生 Bilibili 頂欄仍可獨立運作。
 
-主題漸層跟隨 Bewly「桌面和 Dock 欄」內的「在頂欄顯示主題色漸變」開關：
+主題漸層跟隨原生「在頂欄顯示主題色漸變」開關：Bewly 位於「桌面和 Dock 欄」，BewlyCat 位於「Bewly 元件 → 頂欄」。
 
 - 首次使用請在影片頁打開一次該設定面板，讓腳本讀取實際值；尚未讀到設定時不顯示自訂漸層。
 - 在同一頁切換開關會立即同步，並由腳本管理器記住最後讀到的值。
-- 漸層只出現在劇場頂欄，並沿用 Bewly 的頁首及強制白色圖示條件；全站深色時交回 Bewly 自己處理。
-- Bewly 尚未提供此偏好的公開介面，因此其他分頁的變更不保證自動同步。重新打開本頁設定面板即可重新讀取；未來設定文字或結構變更可能需要重新適配。
+- 漸層只出現在劇場頂欄，離開頁首後收起。BewlyCat 保留新版白色圖示條件，實驗毛玻璃樣式沿用較深的主題色漸層；全站深色時交回擴充功能自己處理。
+- Bewly 與 BewlyCat 目前都未提供此偏好的頁面公開介面，因此其他分頁的變更不保證自動同步。重新打開本頁設定面板即可重新讀取；未來設定文字或結構變更可能需要重新適配。
 
 ## 適用範圍
 
@@ -76,9 +76,9 @@ python -m http.server 8765 --bind 127.0.0.1
 
 開啟 [測試頁](http://127.0.0.1:8765/tests/player.html)；測試會自動執行並顯示結果。可加上 `?saved=true` 檢查已儲存的劇場偏好，或 `?lights=off` 檢查舊版關燈偏好為關閉的情況。
 
-也可加上 `?gradient=on` 或 `?gradient=off` 檢查已儲存的 Bewly 漸層偏好。
+也可加上 `?gradient=on` 或 `?gradient=off` 檢查已儲存的 Bewly 漸層偏好；使用 `?bewly=cat` 測試 BewlyCat，參數可用 `&` 組合。
 
-目前包含 **118 項瀏覽器斷言**，涵蓋模式切換與還原、寬屏互動、偏好儲存、彈幕列置中、資訊排列、延遲初始化、換片、快捷鍵、自動關燈、原生與 Bewly 頂欄主題、主題漸層及設定面板同步。測試使用固定的播放器模擬頁；它不能取代實際 Bilibili 環境的相容性檢查。
+原版 Bewly 包含 **118 項瀏覽器斷言**，BewlyCat 包含 **124 項**，涵蓋模式切換與還原、寬屏互動、偏好儲存、彈幕列置中、資訊排列、延遲初始化、換片、快捷鍵、自動關燈、原生與 Bewly 頂欄主題、主題漸層及設定面板同步；另檢查 BewlyCat 遮罩、自訂深色基底及設定面板定位。測試使用固定的播放器模擬頁；它不能取代實際 Bilibili 環境的相容性檢查。
 
 ## 授權與致謝
 

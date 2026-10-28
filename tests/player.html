@@ -88,7 +88,7 @@
 </main>
 <template id="bewly-fixture">
   <style>
-    :host { --bew-bg: #fff; --bew-content-opacity: .68; --bew-text-1: #15181e; --bew-text-2: #455566; --bew-elevated-solid: #fff; --bew-elevated: #fff; --bew-border-color: #ddd; --bew-theme-color: #b13246; --bew-theme-color-10: color-mix(in oklab, var(--bew-theme-color), transparent 90%); --bew-top-bar-height: 64px; --bew-shadow-1: 0 2px 4px #0001; --bew-shadow-edge-glow-1: inset 0 0 10px #fff9; color: var(--bew-text-1); }
+    :host { --bew-bg: #fff; --bew-content-opacity: .68; --bew-text-1: #15181e; --bew-text-2: #455566; --bew-elevated-solid: #fff; --bew-elevated: #fff; --bew-border-color: #ddd; --bew-theme-color: #b13246; --bew-theme-color-10: color-mix(in oklab, var(--bew-theme-color), transparent 90%); --bew-theme-color-20: color-mix(in oklab, var(--bew-theme-color), transparent 80%); --bew-top-bar-height: 64px; --bew-shadow-1: 0 2px 4px #0001; --bew-shadow-edge-glow-1: inset 0 0 10px #fff9; color: var(--bew-text-1); }
     :host(#bewly.dark), :root.dark { --bew-bg: hsl(230 12% 4%); --bew-text-1: hsl(215 19% 98%); --bew-text-2: #c9ccd0; --bew-elevated-solid: #22252b; --bew-elevated: #22252b; --bew-content: #191b20; --bew-shadow-1: 0 4px 6px #0003; --bew-shadow-edge-glow-1: inset 0 0 10px #ffffff0a; }
     :host(#bewly.disable-shadow), :root.disable-shadow { --bew-shadow-1: 0 0 0 transparent; }
     :host(#bewly.disable-frosted-glass), :root.disable-frosted-glass { --bew-shadow-edge-glow-1: 0 0 0 transparent; }
@@ -101,6 +101,7 @@
     .bew-popover { background: var(--bew-elevated); color: var(--bew-text-2); }
     .other-panel { background: var(--bew-bg); color: var(--bew-text-1); }
     .bew-popover, .other-panel { position: absolute; visibility: hidden; }
+    .top-bar-header__fog, .top-bar-header__legacy-mask, .top-bar-header__glass-overlay { position: absolute; inset: 0; pointer-events: none; }
   </style>
   <div id="bewly-wrapper"><div>
     <header><main h="$bew-top-bar-height"><span class="logo">Bewly</span><div class="search-bar"><input aria-label="Bewly 搜尋" placeholder="搜尋影片"></div><div class="bew-popover">搜尋建議</div></main></header>
