@@ -2,7 +2,7 @@
 // @name         B站剧场模式
 // @name:zh-CN   B站剧场模式
 // @namespace    https://github.com/astrytk/bilibili-theater-mode
-// @version      0.3.11
+// @version      0.3.12
 // @description  为B站普通投稿视频添加类YouTube剧场模式。点击播放器控制栏的剧场按钮或按 T 键切换。
 // @description:zh-CN  为B站普通投稿视频添加类YouTube剧场模式。点击播放器控制栏的剧场按钮或按 T 键切换。
 // @author       astrytk, TW527E
@@ -24,6 +24,24 @@
 
   const VIDEO_RATIO = 11 / 13; // 播放器高度占视口的比例，可改为 4/5 等。
   const BTN_ID = 'bili-theater-btn';
+  // 控制列文字整套跟随页面语言，避免简繁混用。
+  const TRADITIONAL = location.pathname.startsWith('/zh-Hant/')
+    || /^zh-(?:tw|hk|mo|hant)\b/i.test(document.documentElement.lang || '');
+  const TEXT = TRADITIONAL
+    ? {
+        enter: '劇場模式 (T)',
+        exit: '退出劇場模式 (T)',
+        autoLights: '自動關燈',
+        autoLightsLabel: '播放時自動關燈',
+        autoLightsHint: '播放時自動關燈，暫停或結束時恢復',
+      }
+    : {
+        enter: '剧场模式 (T)',
+        exit: '退出剧场模式 (T)',
+        autoLights: '自动关灯',
+        autoLightsLabel: '播放时自动关灯',
+        autoLightsHint: '播放时自动关灯，暂停或结束时恢复',
+      };
   let autoLights = GM_getValue('autoLights', GM_getValue('darkMode', true)) === true;
   let theaterOn = GM_getValue('theaterOn', false) === true;
   let player = null;
@@ -344,13 +362,13 @@
   const lightsSetting = document.createElement('div');
   lightsSetting.id = 'bili-theater-auto-lights';
   lightsSetting.className = 'bpx-player-ctrl-setting-checkbox bui bui-checkbox bui-dark';
-  lightsSetting.title = '播放時自動關燈，暫停或結束時恢復';
+  lightsSetting.title = TEXT.autoLightsHint;
   lightsSetting.innerHTML = `<div class="bui-area">
-    <input id="bili-theater-auto-lights-input" class="bui-checkbox-input" type="checkbox" aria-label="播放時自動關燈">
+    <input id="bili-theater-auto-lights-input" class="bui-checkbox-input" type="checkbox" aria-label="${TEXT.autoLightsLabel}">
     <label class="bui-checkbox-label" for="bili-theater-auto-lights-input">
       <span class="bui-checkbox-icon bui-checkbox-icon-default" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M8 6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H8zm0-2h16c2.21 0 4 1.79 4 4v16c0 2.21-1.79 4-4 4H8c-2.21 0-4-1.79-4-4V8c0-2.21 1.79-4 4-4z"/></svg></span>
       <span class="bui-checkbox-icon bui-checkbox-icon-selected" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="m13 18.25-1.8-1.8c-.6-.6-1.65-.6-2.25 0s-.6 1.5 0 2.25l2.85 2.85c.318.318.762.468 1.2.448.438.02.882-.13 1.2-.448l8.85-8.85c.6-.6.6-1.65 0-2.25s-1.65-.6-2.25 0l-7.8 7.8zM8 4h16c2.21 0 4 1.79 4 4v16c0 2.21-1.79 4-4 4H8c-2.21 0-4-1.79-4-4V8c0-2.21 1.79-4 4-4z"/></svg></span>
-      <span class="bui-checkbox-name">自動關燈</span>
+      <span class="bui-checkbox-name">${TEXT.autoLights}</span>
     </label>
   </div>`;
   const lightsInput = lightsSetting.querySelector('input');
@@ -401,7 +419,7 @@
     <span class="bili-theater-tooltip" aria-hidden="true"></span>`;
 
   function syncButton() {
-    const label = theaterOn ? '退出剧场模式 (T)' : '剧场模式 (T)';
+    const label = theaterOn ? TEXT.exit : TEXT.enter;
     button.setAttribute('aria-label', label);
     button.setAttribute('aria-pressed', String(theaterOn));
     button.querySelector('.bili-theater-tooltip').textContent = label;
