@@ -121,6 +121,7 @@
     makePlayer(); await settle();
     const saved = testPrefs.get('theaterOn');
     check(active() === saved && style().disabled === !saved, '載入影片時套用上次保存的開關狀態');
+    check(/劇場模式/.test(button().getAttribute('aria-label')) && document.querySelector('#bili-theater-auto-lights .bui-checkbox-name').textContent === '自動關燈', '繁體頁面的按鈕與設定都用繁體');
     check(saved ? player().dataset.screen === 'wide' : player().dataset.screen === 'normal', '自動套用時同步寬屏狀態');
     check(!nativeLight().checked, '暫停時不因劇場偏好關燈');
     if (saved) key();
