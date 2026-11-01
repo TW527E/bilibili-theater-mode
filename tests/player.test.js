@@ -89,7 +89,7 @@
       </div></div></div>
       <div id="arc_toolbar_report">互動按鈕</div><div id="v_desc">測試影片簡介</div><div id="commentapp"><h2>評論</h2></div>
       </div><div class="right-container"><div class="right-container-inner">
-        <div class="up-panel-container"><a class="up-avatar" href="#test-channel">測試 UP 主</a><div class="default-btn">載入中</div></div>
+        <div class="up-panel-container"><a class="up-avatar" href="#test-channel">頭像</a> <a class="up-name" href="#test-channel">測試 UP 主</a> <a class="send-msg" href="#test-message">發訊息</a><div class="default-btn">載入中</div></div>
         <div class="video-pod-above-modules"><div class="video-pod-above-modules__inner"><div class="danmaku-box">彈幕列表</div></div></div>
         <div class="rcmd-tab"><h2>接下來播放</h2><a href="#test-recommendation">推薦影片連結</a></div>
       </div></div></div>`;
@@ -114,6 +114,13 @@
     const right = document.querySelector('.right-container');
     check(title.getBoundingClientRect().top >= wrap.getBoundingClientRect().bottom - 1 && up.getBoundingClientRect().top >= title.getBoundingClientRect().bottom && up.getBoundingClientRect().bottom <= document.querySelector('#arc_toolbar_report').getBoundingClientRect().top, `${mode}：標題與 UP 主都在播放器下方`);
     check(getComputedStyle(right).display !== 'none' && right.getBoundingClientRect().width > 0 && right.querySelector('.rcmd-tab a').getAttribute('href') === '#test-recommendation', `${mode}：推薦影片與連結保留`);
+    const previousScroll = scrollY;
+    up.scrollIntoView({block: 'center', behavior: 'instant'});
+    for (const control of up.querySelectorAll('a, button')) {
+      const bounds = control.getBoundingClientRect();
+      check(control.contains(document.elementFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)), `${mode}：${control.className || '關注'} 的實際點擊位置不被左欄遮擋`);
+    }
+    window.scrollTo({top: previousScroll, behavior: 'instant'});
   }
   try {
     check(!button(), '播放器尚未載入時不掛到頁面角落');

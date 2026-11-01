@@ -20,13 +20,14 @@
   h2 { font-size: 18px; margin: 0 0 8px; }
   #fixture { background: var(--bg1); }
   .video-container-v1 { display: flex; gap: 24px; width: calc(100% - 48px); max-width: 1200px; margin: auto; align-items: flex-start; }
-  .left-container { flex: 1; min-width: 0; }
+  .left-container { flex: 1; min-width: 0; z-index: 1; }
   .right-container { width: 350px; flex-shrink: 0; }
   .up-panel-container, .rcmd-tab, #arc_toolbar_report, #v_desc, #commentapp { padding-block: 12px; }
   .video-pod-above-modules, .video-pod-above-modules__inner { display: flow-root; }
   .danmaku-box { height: 44px; margin-bottom: 20px; }
   .video-container-v1:has(.bpx-player-container[data-screen="wide"]) .danmaku-box { margin-top: 769px; }
   .up-panel-container a, .rcmd-tab a { color: inherit; }
+  .up-panel-container a { display: inline-flex; align-items: center; }
   .up-panel-container button { margin-left: 12px; font: inherit; }
   .rcmd-tab a { display: block; }
   @media (max-width: 900px) {
