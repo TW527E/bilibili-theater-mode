@@ -4,11 +4,11 @@
 
 A userscript that adds a YouTube-style theater mode to regular videos on Bilibili's desktop website. The player spans the page, with the title, video information, and uploader details below it. Recommendations and comments remain available.
 
-Forked from [astrytk/bilibili-theater-mode](https://github.com/astrytk/bilibili-theater-mode), with subsequent changes maintained by TW527E. Current version: **0.3.11**.
+Forked from [astrytk/bilibili-theater-mode](https://github.com/astrytk/bilibili-theater-mode), with subsequent changes maintained by TW527E. Current version: **0.3.13**.
 
 ## Installation and updates
 
-You can also install from [GreasyFork](https://greasyfork.org/scripts/602246). GreasyFork periodically synchronizes the script and its description from this repository's `main` branch; updates may not appear immediately after a push. Install from one source to avoid duplicate active copies.
+You can also install from [GreasyFork](https://greasyfork.org/scripts/602246). GreasyFork automatically synchronizes the script and its description from this repository's `main` branch; updates may not appear immediately after a push. Install from one source to avoid duplicate active copies.
 
 1. Install a userscript manager such as [Tampermonkey](https://www.tampermonkey.net/).
 2. [Install Bilibili Theater Mode](https://raw.githubusercontent.com/TW527E/bilibili-theater-mode/main/bili-theater.user.js) and confirm installation in your userscript manager.
@@ -38,9 +38,9 @@ This fork retains the original script name and `@namespace` to support updating 
 | Press `T` | Toggle theater mode; ignored while editing text, composing input, holding a modifier, or repeating a key |
 | Focus the theater button and press `Enter` or Space | Toggle theater mode |
 | Click the native wide-screen button | Exit theater mode and let the native player handle the screen change |
-| Player settings → More playback settings → Other settings → 自動關燈 | Toggle lights off during playback, using the same checkbox style as adjacent settings |
+| Player settings → More playback settings → Other settings → 自動關燈 / 自动关灯 | Toggle lights off during playback, using the same checkbox style as adjacent settings |
 
-The added lights setting is labeled **自動關燈** (“automatic lights off”). It defaults to enabled and inherits the old automatic-dark-mode preference. It does not change the website theme. If lights were already off before playback, they stay off after pausing. The old floating button and userscript-manager settings menu have been removed.
+Player control labels follow the page language (Traditional or Simplified Chinese), including **自動關燈 / 自动关灯** (“automatic lights off”). It defaults to enabled and inherits the old automatic-dark-mode preference. It does not change the website theme. If lights were already off before playback, they stay off after pausing. The old floating button and userscript-manager settings menu have been removed.
 
 Exiting with the theater button or `T` restores the normal/wide-screen state from before entering theater mode. To adjust player height, edit `VIDEO_RATIO` near the top of the script; the default is `11/13` of the viewport height.
 
@@ -78,7 +78,7 @@ Open the [test page](http://127.0.0.1:8765/tests/player.html). Tests run automat
 
 Use `?gradient=on` or `?gradient=off` to test a saved Bewly gradient preference. Use `?bewly=cat` for the BewlyCat fixture; combine parameters with `&`.
 
-The suite contains **118 browser assertions for original Bewly** and **124 for BewlyCat** covering mode changes and restoration, native wide-screen interaction, stored preferences, centered danmaku controls, details layout, delayed initialization, player replacement, keyboard shortcuts, automatic lights off, native and Bewly header themes, theme gradients, and settings-panel synchronization. Cat checks also cover masks, custom dark bases, and settings-panel positioning. It uses a fixed player fixture and does not replace compatibility checks on the real Bilibili website.
+The suite contains **137 browser assertions for original Bewly** and **143 for BewlyCat** covering mode changes and restoration, native wide-screen interaction, stored preferences, centered danmaku controls, details layout, delayed initialization, player replacement, keyboard shortcuts, automatic lights off, native and Bewly header themes, theme gradients, settings-panel synchronization, and uploader control hit targets. Cat checks also cover masks, custom dark bases, and settings-panel positioning. It uses a fixed player fixture and does not replace compatibility checks on the real Bilibili website.
 
 ## License and credits
 

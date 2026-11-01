@@ -2,7 +2,7 @@
 // @name         B站剧场模式
 // @name:zh-CN   B站剧场模式
 // @namespace    https://github.com/astrytk/bilibili-theater-mode
-// @version      0.3.12
+// @version      0.3.13
 // @description  为B站普通投稿视频添加类YouTube剧场模式。点击播放器控制栏的剧场按钮或按 T 键切换。
 // @description:zh-CN  为B站普通投稿视频添加类YouTube剧场模式。点击播放器控制栏的剧场按钮或按 T 键切换。
 // @author       astrytk, TW527E
@@ -69,6 +69,8 @@
     }
     .bili-details-layout .up-panel-container {
       position: absolute !important;
+      /* 原生左栏的 flex item 层级为 1，会遮住移到下方的 UP 主。 */
+      z-index: 2;
       top: var(--bili-up-top);
       left: var(--bili-up-left);
       width: var(--bili-up-width) !important;
