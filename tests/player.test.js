@@ -383,6 +383,13 @@
     nativeLight().click(); playback(true); playback(false, 'emptied');
     check(!nativeLight().checked, '媒體清空時恢復');
     playback(true);
+    const lightRow = nativeLight().closest('.bpx-player-ctrl-setting-lightoff');
+    const rebuiltRow = lightRow.cloneNode(true);
+    rebuiltRow.querySelector('input').checked = true;
+    lightRow.replaceWith(rebuiltRow); await settle();
+    playback(false);
+    check(!nativeLight().checked, '播放中重建關燈控制項後，暫停仍還原原狀');
+    playback(true);
     const oldVideo = player().querySelector('video');
     makePlayer(); await settle();
     check(!nativeLight().checked && document.querySelectorAll('#bili-theater-auto-lights').length === 1, '換片後重新掛載開關並依新影片狀態恢復');
