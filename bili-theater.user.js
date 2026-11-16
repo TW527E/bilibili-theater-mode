@@ -393,6 +393,9 @@
     const nextVideo = player?.querySelector('video');
     if (video !== nextVideo) {
       restoreLights();
+      // A saved state kept for a rebuilt menu belongs to the old video; the
+      // new player starts from its own native setting.
+      originalLight = null;
       for (const type of ['play', 'pause', 'ended', 'emptied']) {
         video?.removeEventListener(type, syncLights);
         nextVideo?.addEventListener(type, syncLights);

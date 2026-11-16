@@ -395,6 +395,9 @@
     check(!nativeLight().checked && document.querySelectorAll('#bili-theater-auto-lights').length === 1, '換片後重新掛載開關並依新影片狀態恢復');
     oldVideo.dispatchEvent(new Event('play'));
     check(!nativeLight().checked, '卸下舊影片的播放事件');
+    playback(false); nativeLight().click(); playback(true);
+    makePlayer(); await settle();
+    check(!nativeLight().checked, '原本已關燈的影片換成新播放器時，不把舊狀態套到新影片');
     autoLight().closest('#bili-theater-auto-lights').remove(); await settle();
     check(!!autoLight(), '設定選單重新渲染後補回開關');
     const originalHref = document.querySelector('#__css-map__').href;
