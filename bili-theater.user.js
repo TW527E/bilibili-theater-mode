@@ -2,7 +2,7 @@
 // @name         B站剧场模式
 // @name:zh-CN   B站剧场模式
 // @namespace    https://github.com/astrytk/bilibili-theater-mode
-// @version      0.3.13
+// @version      0.3.14
 // @description  为B站普通投稿视频添加类YouTube剧场模式。点击播放器控制栏的剧场按钮或按 T 键切换。
 // @description:zh-CN  为B站普通投稿视频添加类YouTube剧场模式。点击播放器控制栏的剧场按钮或按 T 键切换。
 // @author       astrytk, TW527E
@@ -341,16 +341,18 @@
   }
 
   function restoreLights() {
-    if (originalLight !== null && lightControl?.isConnected && lightControl.checked !== originalLight) {
-      lightControl.click();
-    }
+    if (originalLight === null) return;
+    // Bilibili can rebuild the settings menu while a video plays. Keep the
+    // saved state until a connected control can restore it.
+    if (!lightControl?.isConnected) return;
+    if (lightControl.checked !== originalLight) lightControl.click();
     originalLight = null;
   }
 
   function syncLights() {
     const nextControl = player?.querySelector('.bpx-player-ctrl-setting-lightoff input');
     if (nextControl !== lightControl) {
-      restoreLights();
+      if (lightControl?.isConnected) restoreLights();
       lightControl = nextControl;
     }
     if (autoLights && video?.isConnected && !video.paused && !video.ended && lightControl) {
@@ -391,6 +393,9 @@
     const nextVideo = player?.querySelector('video');
     if (video !== nextVideo) {
       restoreLights();
+      // A saved state kept for a rebuilt menu belongs to the old video; the
+      // new player starts from its own native setting.
+      originalLight = null;
       for (const type of ['play', 'pause', 'ended', 'emptied']) {
         video?.removeEventListener(type, syncLights);
         nextVideo?.addEventListener(type, syncLights);
